@@ -1,2 +1,3 @@
 # Satisfiability-checker
- A satisfazibility checker for propositional formulas, using analytic tableaux 
+
+ A satisfiability checker for propositional formulas, using analytic tableaux  
