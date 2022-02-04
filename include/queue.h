@@ -32,6 +32,8 @@ queue new_queue()
     queue new_queue;
     new_queue.head = NULL;
     new_queue.tail = NULL;
+    
+    return new_queue;
 }
 
 void que_push(queue q, tree_nd *formula)
