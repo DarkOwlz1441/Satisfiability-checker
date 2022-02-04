@@ -1,3 +1,3 @@
-# Satisfiability-checker
+# analytic-tableaux-in-C
 
- A satisfiability checker for propositional formulas, using analytic tableaux  
+Propositional formula deductive methods, using analytic tableaux deductive system. 
