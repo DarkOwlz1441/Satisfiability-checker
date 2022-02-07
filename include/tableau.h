@@ -1,7 +1,7 @@
 /* 
     tableau structures and methods implementation.
     
-    types of conjugated (marked) formulas and it's expansions:
+    types of conjugated (marked) formulae and it's expansions:
     _____________________    _____________________
     |    α FORMULAS     |    |    β FORMULAS     |
     |___________________|    |___________________|
@@ -60,7 +60,14 @@ tab_nd *new_tab_node(marked mk_form, tab_nd *left, tab_nd *right)
     new_nd->mk_form = mk_form;
 }
 
-// auxiliary function to add formulas to all the branches, 
+// function that builds the initial tableau, using the entered formulae,
+// which were put in a queue.
+tab_nd *init_tableau(queue forms)
+{
+    // TODO: init tableau
+}
+
+// auxiliary function to add formulae to all the branches, 
 // in a alpha expansion
 void add_forms_alpha(tab_nd *root, tab_nd *add1, tab_nd *add2)
 {
@@ -69,6 +76,9 @@ void add_forms_alpha(tab_nd *root, tab_nd *add1, tab_nd *add2)
     
     if(root->l)
         add_forms_alpha(root->l, add1, add2);
+    
+    if(root->r)
+        add_forms_alpha(root->r, add1, add2);
     
     if(!root->l && !root->r)
     {
@@ -80,13 +90,9 @@ void add_forms_alpha(tab_nd *root, tab_nd *add1, tab_nd *add2)
 
         else
             root->l = add2;
-        
-        return;
     }
-
-    if(root->r)
-        add_forms_alpha(root->r, add1, add2);
 }
+
 
 void add_forms_beta(tab_nd *root, tab_nd *add1, tab_nd *add2)
 {
@@ -107,6 +113,7 @@ void add_forms_beta(tab_nd *root, tab_nd *add1, tab_nd *add2)
         add_forms_beta(root->r, add1, add2);
 }
 
+// handle cases for an alpha expansion
 void alpha_exp(tab_nd *root, tab_nd *form)
 {
 
@@ -139,11 +146,13 @@ void alpha_exp(tab_nd *root, tab_nd *form)
     }
 }
 
+// handle cases for a beta expansion
 void beta_exp(tab_nd *root, tab_nd *form)
 {
     // TODO: beta expansion cases
 }
 
+// expands a formula
 void expand_form(tab_nd *root, tab_nd *form)
 {
     if(!form)
