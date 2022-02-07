@@ -53,3 +53,13 @@ void stk_pop_all(stk_nd **head)
     while(*head)
         stk_pop(head);
 }
+
+void stk_show(stk_nd *head)
+{
+    if(!head)
+        return;
+
+    in_order(head->formula);
+    printf("\n");
+    stk_show(head->next);
+}

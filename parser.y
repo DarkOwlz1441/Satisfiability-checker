@@ -2,9 +2,14 @@
     #include <stdio.h>
 
     #include "include/s_tree.h"
+    #include "include/stack.h"
+    #include "include/tableau.h"
 
     int yylex();
     int yyerror();
+    stk_nd *formulae = NULL;
+    int signal = 0;
+
     // int yydebug = 1; // debugger session is active
 %}
 
@@ -21,6 +26,7 @@
 %token <s> ATOM
 %token <s> LP RP
 %token <s> AND OR IMP NOT
+%token <s> EXIT
 %token <s> OTHER
 
 /* below are the nonterminal symbols, represented by nodes (subtrees) of a syntax tree. */
@@ -33,9 +39,12 @@
 
 proposition: /*nothing*/ {}
 |   proposition implication EOL{
-        node *formula = $2;
-        return 0;
+        stk.push(formulae, $2);
+        
+        if(signal > 0)
+            return 0;
     }
+    EXIT EOL{return 0;}
 ;
 
 /* an implication can be either a single disjunction or
@@ -77,18 +86,17 @@ term: ATOM {$$ = new_node($1, NULL, NULL);}
 
 void fancy_welcome()
 {
-    printf("=-=-=-=-=-= CONVERT FORMULA TO CNF =-=-=-=-=-=\n\n");
-    printf("enter expression, hit ENTER, and a equivalent CNF will be prompted.\n");
+    printf("=-=-=-=-=-= SEQUENT SOLVER WITH ANALYTIC TABLEAUX =-=-=-=-=-=\n\n");
+    printf("enter gamma formulae, ! to stop\n");
     printf("> ");
 }
 
 int main (int argc, char *argv[])
 {
-    tree_nd *formula = NULL;
-    fancy_welcome();
+    printf("=-=-=-=-=-= SEQUENT SOLVER WITH ANALYTIC TABLEAUX =-=-=-=-=-=\n\n");
+    printf("enter gamma formulae, ! to stop\n");
+    printf("> ");
     yyparse();
-
-    
 }
 
 int yyerror(char *s)

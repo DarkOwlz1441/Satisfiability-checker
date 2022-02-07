@@ -15,6 +15,7 @@
 "("   { return LP; }
 ")"   { return RP; }
 \n    { return EOL; }
+"!"   { return EXIT;}
 [ \t] { /*do nothing*/ } /* this is for ignoring whitespace */
 .     { return OTHER; }
 

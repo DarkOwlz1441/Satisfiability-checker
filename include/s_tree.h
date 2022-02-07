@@ -85,12 +85,28 @@ void in_order(tree_nd *root)
     }
 }
 
-void free_tree(tree_nd **root)
+void free_tree(tree_nd **ref_root)
 {
-    if(!root || !*root)
-    {
+    if(!ref_root || !*ref_root)
+        return;
 
+    tree_nd *root = *ref_root;
+
+    if(root->l)
+    {
+        tree_nd **aux = &root->l;
+        root->l = NULL;
+        free_tree(aux);
     }
+
+    if(root->l)
+    {
+        tree_nd **aux = &root->l;
+        root->l = NULL;
+        free_tree(aux);
+    }
+
+    free(root);
 }
 
 //  Function that clones a tree formed by the node structure
