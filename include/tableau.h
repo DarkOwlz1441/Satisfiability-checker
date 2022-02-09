@@ -14,14 +14,15 @@
     | F_¬A  |    T_A    |    
     |||||||||||||||||||||
 */
+#pragma once
 
 #include <stdlib.h>
 #include "s_tree.h"
 #include "stack.h"
 #include "utils.h"
 
-enum mark{MARK_T, MARK_F, MARK_ERROR};
-enum type{ALPHA, BETA, ATOM, TYPE_ERROR};
+typedef enum enum_mark{MARK_T, MARK_F, MARK_ERROR} mark;
+typedef enum enum_type{TYPE_ALPHA, TYPE_BETA, TYPE_ATOM, TYPE_ERROR} type;
 
 typedef struct marked_formula
 {
@@ -37,16 +38,16 @@ type which_type(tree_nd *form, mark mk)
         return TYPE_ERROR;
 
     if(!form->l && !form->r)
-        return ATOM;
+        return TYPE_ATOM;
     
     else if(( mk == MARK_F && !strcmp(form->tok, "&") ) || 
             ( mk == MARK_T && (!strcmp(form->tok, "#") || !strcmp(form->tok, "#")) ))
     {
-        return BETA;
+        return TYPE_BETA;
     }
 
     else
-        return ALPHA;
+        return TYPE_ALPHA;
 }
 
 marked new_marked_form(mark mk, tree_nd *form)
@@ -197,13 +198,13 @@ void expand_form(tab_nd *root, tab_nd *form)
         return;
 
     // alpha expansions
-    if(form->mk_form.tp == ALPHA)
+    if(form->mk_form.tp == TYPE_ALPHA)
     {
         alpha_exp(root, form);        
     }
     
     // beta expansions
-    else if(form->mk_form.tp == BETA)
+    else if(form->mk_form.tp == TYPE_BETA)
     {
         beta_exp(root, form);
     }

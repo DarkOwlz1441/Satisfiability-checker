@@ -1,5 +1,5 @@
 %{
-    #include "logic2.tab.h"
+    #include "parser.tab.h"
     char *custom_strdup(const char *);
 %}
 

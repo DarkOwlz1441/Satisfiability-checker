@@ -1,5 +1,7 @@
 /* stack data structure to store multiple formulae */
 
+#pragma once
+
 #include <stdlib.h>
 #include "s_tree.h"
 
