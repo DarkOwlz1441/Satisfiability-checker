@@ -1,5 +1,7 @@
 /* 
     tableau structures and methods implementation.
+
+    the tableau itself is structured as a binary tree.
     
     types of conjugated (marked) formulae and it's expansions:
     _____________________    _____________________
@@ -14,6 +16,7 @@
     | F_¬A  |    T_A    |    
     |||||||||||||||||||||
 */
+
 #pragma once
 
 #include <stdlib.h>
@@ -208,4 +211,59 @@ void expand_form(tab_nd *root, tab_nd *form)
     {
         beta_exp(root, form);
     }
+}
+
+// this is just printing the formulas of the tableau.
+// not organized.
+void show_tableau(tab_nd *tableau)
+{
+    if(!tableau)
+        return;
+
+    marked formula = tableau->mk_form;
+    
+    if(formula.mk == MARK_T)
+        fputs("T", stdout);
+    else
+        fputs("F", stdout);
+
+    show_form(formula.form);
+    puts("");
+
+    if(tableau->l)
+        show_tableau(tableau->l);
+
+    if(tableau->r)
+        show_tableau(tableau->r);
+}
+
+/*
+    show tableau in a "fitch" way, organized in "boxes"
+    it gives us the possibility of visualizing the branches
+    better, in a linear way. It is an easier to display
+    alternative to the original tree format.
+    __________________________________________________________
+    | tableau in regular format  |  tableau in FITCH format  |
+    |____________________________|___________________________| 
+    |           F_A∧B            | F_A∧B                     |
+    |           T_A∨B            | T_A∨B                     |
+    |           T_¬A             | T_¬A                      |
+    |        /         \         | | F_B                     |
+    |      F_A         F_B       | | | T_B                   |
+    |     /   \       /   \      | | | x                     |
+    |   T_A   T_B   T_A    T_B   | | T_A                     |
+    |    x    F_A   F_A     x    | | F_A                     |
+    |                x           | | x                       |
+    |                            | F_A                       |
+    |                            | | T_B                     |
+    |                            | | F_A                     |
+    |                            | F_A                       |
+    |                            | T_A                       |
+    |                            | x                         |
+    |____________________________|___________________________|
+*/
+void show_tableau_fitch()
+{
+    // TODO: implement code for displaying tableau in a 
+    // fitch way.
 }

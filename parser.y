@@ -41,25 +41,21 @@
 /* the routines below are executed at the same time a syntax tree is built. */
 
 proposition: /*nothing*/ {}
-|   proposition EOL {printf("> ");}
+|   proposition EOL {fputs("> ", stdout);}
 |   proposition EXIT EOL {
         if(read_style == MULTIPLE)
-        {
-            printf("ohhh yeahhh\n");
             return 0;
-        }
         else
-            printf("> ");
+            fputs("> ", stdout);
     }
 
 |   proposition implication EOL {
         stk_push(&formulae, $2);
-        free_tree(&($2));
         
         if(read_style == ONLY_ONE)
             return 0;
         
-        printf("> ");
+        fputs("> ", stdout);
     }
 ;
 
@@ -102,23 +98,26 @@ term: ATOM {$$ = new_tree_node($1, NULL, NULL);}
 
 void fancy_welcome()
 {
-    printf("=-=-=-=-=-= SEQUENT SOLVER WITH ANALYTIC TABLEAUX =-=-=-=-=-=\n\n");
-    printf("enter gamma formulae, ! to stop\n");
-    printf("> ");
+    puts("=-=-=-=-=-= SEQUENT SOLVER WITH ANALYTIC TABLEAUX =-=-=-=-=-=\n");
+    puts("enter gamma formulae, ! to stop");
+    fputs("> ", stdout);
 }
 
 int main (int argc, char *argv[])
 {
-    printf("=-=-=-=-=-= SEQUENT SOLVER WITH ANALYTIC TABLEAUX =-=-=-=-=-=\n\n");
-    printf("enter gamma formulae, ! to stop\n");
-    printf("> ");
+    puts("=-=-=-=-=-= SEQUENT SOLVER WITH ANALYTIC TABLEAUX =-=-=-=-=-=\n");
+    puts("enter gamma formulae, ! to stop");
+    fputs("> ", stdout);
     yyparse();
-    printf("end of parsing, changing scan mode\n");
+    puts("end of parsing, changing scan mode");
     read_style = ONLY_ONE;
-    printf("changed, reading now the subsequent formulae\n");
-    printf("> ");
+    puts("changed, reading now the subsequent formulae");
+    fputs("> ", stdout);
     yyparse();
-    printf("OK, END TEST\n");
+    puts("OK, END TEST");
+    puts("initial tableau forms test:");
+    show_tableau(init_tableau(formulae));
+    
 }
 
 int yyerror(char *s)

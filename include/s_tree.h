@@ -1,9 +1,9 @@
 /* this is the code to a cool syntax tree */
 
-#define OMIT_PAR 0 // set this constant to zero to omit unnecessary parenthesis when printing formulas.
-                   // set to nonzero to omit only external parenthesis.
 #pragma once
 
+#define OMIT_PAR 0 // set this constant to zero to omit unnecessary parenthesis when printing formulas.
+                   // set to nonzero to omit only external parenthesis.
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -31,9 +31,11 @@ tree_nd *new_tree_node(const char* tok, tree_nd *l, tree_nd *r)
 
     return new_nd;
 }
-
-//A modified "in order" funtion. Used for printing the syntax tree as a parentesized expression
-void in_order(tree_nd *root)
+/*
+    A modified "in order" funtion.
+    Used for printing the parentesized formula from the syntax tree
+*/
+void show_form(tree_nd *root)
 {
     if (!root)
         return;
@@ -58,7 +60,7 @@ void in_order(tree_nd *root)
         if (verify)
             putchar('(');
         
-        in_order(root->l);
+        show_form(root->l);
 
         if (verify)
             putchar(')');
@@ -78,7 +80,7 @@ void in_order(tree_nd *root)
         if (verify)
             putchar('(');
 
-        in_order(root->r);
+        show_form(root->r);
 
         if (verify)
             putchar(')');
@@ -116,4 +118,30 @@ tree_nd* clone_tree(tree_nd *root)
         return NULL;
 
     return new_tree_node(root->tok, clone_tree(root->l), clone_tree(root->r));
+}
+
+bool equal_forms(tree_nd *form1, tree_nd *form2)
+{
+    // returns true if the formulas are the same object in memory,
+    // or if both are NULL
+    if(form1 == form2)
+        return TRUE;
+
+    // returns false if just one of them is NULL
+        // (the only way to make the conditional below be evaluated as true is
+        // if just one of them is NULL. If both were NULL,
+        // the previous conditional would be evaluated and the rest of
+        // the code would never happen.)
+    if(!form1 || !form2)
+        return FALSE;
+
+    // if the current nodes are not the same value, returns false
+    if(strcmp(form1->tok, form2->tok))
+        return FALSE;
+    
+    // if none of the above happened, we can suppose the current nodes
+    // are equal. Thus we can do the recursive calls to left and right, 
+    // that is, if both subtrees of both formulas are equal, this is
+    // returned as true.
+    return TRUE && equal_forms(form1->l, form2->l) && equal_forms(form1->r, form2->r);
 }
