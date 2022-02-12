@@ -2,13 +2,14 @@
 
 #pragma once
 
-#define OMIT_PAR 0 // set this constant to zero to omit unnecessary parenthesis when printing formulas.
-                   // set to nonzero to omit only external parenthesis.
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
 #include "utils.h"
+
+#define ALL_PAR FALSE // set this to true for using all parentesis possible (except external ones)
+                      // set to false for omiting most unnecessary parentesis
 
 //Structure responsible for implementing tree nodes
 typedef struct tree_node
@@ -43,7 +44,7 @@ void show_form(tree_nd *root)
     if (!root->l && !root->r)
     {
         printf("%s", root->tok);
-        return;   
+        return;
     }
     
     if (!strcmp(root->tok, "-"))
@@ -53,9 +54,9 @@ void show_form(tree_nd *root)
     
     if (root->l)
     {
-        int verify = (root->l->l && root->l->r
+        bool verify = (root->l->l && root->l->r
                      && (strcmp(root->tok, root->l->tok) || !strcmp(root->tok, ">")
-                     || OMIT_PAR)) ? 1: 0;
+                     || ALL_PAR)) ? 1: 0;
 
         if (verify)
             putchar('(');
@@ -65,7 +66,7 @@ void show_form(tree_nd *root)
         if (verify)
             putchar(')');
     }
-    
+
     if (strstr("&#>", root->tok))
     {
         putchar(' ');
@@ -75,8 +76,8 @@ void show_form(tree_nd *root)
 
     if (root->r)
     {
-        int verify = (root->r->l && root->r->r && (strcmp(root->tok, root->r->tok)
-                     || OMIT_PAR)) ? 1 : 0;
+        bool verify = (root->r->l && root->r->r && (strcmp(root->tok, root->r->tok)
+                     || ALL_PAR)) ? 1 : 0;
         if (verify)
             putchar('(');
 

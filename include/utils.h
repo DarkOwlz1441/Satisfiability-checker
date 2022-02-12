@@ -7,7 +7,7 @@
 /*
     This is the definition of a boolean type, using enums.
 */
-typedef enum enum_bool{FALSE, TRUE} bool;
+typedef enum bool{FALSE, TRUE} bool;
 
 /*
     This function is responsible for duplicating literal strings,

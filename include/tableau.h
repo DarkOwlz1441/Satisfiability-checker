@@ -24,8 +24,8 @@
 #include "stack.h"
 #include "utils.h"
 
-typedef enum enum_mark{MARK_T, MARK_F, MARK_ERROR} mark;
-typedef enum enum_type{TYPE_ALPHA, TYPE_BETA, TYPE_ATOM, TYPE_ERROR} type;
+typedef enum mark{MARK_T, MARK_F, MARK_ERROR} mark;
+typedef enum type{TYPE_ALPHA, TYPE_BETA, TYPE_ATOM, TYPE_ERROR} type;
 
 typedef struct marked_formula
 {
@@ -37,30 +37,27 @@ typedef struct marked_formula
 // AUXILIARY that analyses a formula and returns its type
 type which_type(tree_nd *form, mark mk)
 {
-    if(!form)
+    if(!form || mk == MARK_ERROR)
         return TYPE_ERROR;
 
     if(!form->l && !form->r)
         return TYPE_ATOM;
     
-    else if(( mk == MARK_F && !strcmp(form->tok, "&") ) || 
-            ( mk == MARK_T && (!strcmp(form->tok, "#") || !strcmp(form->tok, "#")) ))
-    {
+    if(( mk == MARK_F && !strcmp(form->tok, "&") ) || 
+       ( mk == MARK_T && (!strcmp(form->tok, "#") || !strcmp(form->tok, ">")) ))
         return TYPE_BETA;
-    }
 
-    else
-        return TYPE_ALPHA;
+    return TYPE_ALPHA;
 }
 
 marked new_marked_form(mark mk, tree_nd *form)
 {
-    marked new_nd;
-    new_nd.form = form;
-    new_nd.mk = mk;
-    new_nd.tp = which_type(form, mk); // TODO: handle TYPE_ERROR
+    marked new_marked;
+    new_marked.form = form;
+    new_marked.mk = mk;
+    new_marked.tp = which_type(form, mk);
 
-    return new_nd;
+    return new_marked;
 }
 
 typedef struct tableau_node
@@ -80,29 +77,33 @@ tab_nd *new_tab_node(marked mk_form, tab_nd *left, tab_nd *right)
     new_nd->l = left;
     new_nd->r = right;
     new_nd->mk_form = mk_form;
+
+    return new_nd;
 }
 
 
 
 // function that builds the initial tableau, using the entered formulae,
 // which were put in a stack.
-tab_nd *init_tableau(stk_nd *formulae)
+tab_nd *init_tableau(stk_nd **formulae) // needs debugging
 {
-    if(!formulae)
+    if(!formulae || !*formulae)
+    {
         fprintf(stderr, "ERROR on init tableau: stack empty\n");
         return NULL;
-
+    }
+    
     // pops the first formula from the stack and adds to the tableau.
     // that is the inferred formula of the sequent.
-    tab_nd *new_tab = new_tab_node(new_marked_form(MARK_F, stk_pop(&formulae)), NULL, NULL);
+    tab_nd *new_tab = new_tab_node(new_marked_form(MARK_F, stk_pop(formulae)), NULL, NULL);
     
     tab_nd *aux = new_tab;
 
     // pops and add the rest of the formulas to the tableau
     // those are the formulae that are used to infer in the sequent.
-    while(formulae)
+    while(*formulae)
     {
-        aux->l = new_tab_node(new_marked_form(MARK_T, stk_pop(&formulae)), NULL, NULL);
+        aux->l = new_tab_node(new_marked_form(MARK_T, stk_pop(formulae)), NULL, NULL);
         aux = aux->l;
     }
     
@@ -215,26 +216,29 @@ void expand_form(tab_nd *root, tab_nd *form)
 
 // this is just printing the formulas of the tableau.
 // not organized.
-void show_tableau(tab_nd *tableau)
+void __show_tableau(tab_nd *tableau)
 {
     if(!tableau)
         return;
 
-    marked formula = tableau->mk_form;
-    
-    if(formula.mk == MARK_T)
+    if(tableau->mk_form.mk == MARK_T)
         fputs("T", stdout);
     else
         fputs("F", stdout);
 
-    show_form(formula.form);
+    show_form(tableau->mk_form.form);
     puts("");
 
-    if(tableau->l)
-        show_tableau(tableau->l);
+    __show_tableau(tableau->l);
+    __show_tableau(tableau->r);
+}
 
-    if(tableau->r)
-        show_tableau(tableau->r);
+void show_tableau(tab_nd *tableau)
+{
+    if(!tableau)
+        puts("EMPTY TABLEAU");
+    else
+        __show_tableau(tableau);
 }
 
 /*
@@ -262,8 +266,27 @@ void show_tableau(tab_nd *tableau)
     |                            | x                         |
     |____________________________|___________________________|
 */
-void show_tableau_fitch()
+void show_tableau_fitch(tab_nd *root, unsigned counter)
 {
     // TODO: implement code for displaying tableau in a 
     // fitch way.
+
+    if(!root)
+        return;
+    
+    for(int i = 0; i < counter; i++)
+    {
+        fputs("| ", stdout);
+    }
+
+    if(root->mk_form.mk == MARK_T)
+        fputs("T", stdout);
+    else
+        fputs("F", stdout);
+    
+    show_form(root->mk_form.form);
+    puts("");
+    
+    show_tableau_fitch(root->r, counter + 1);
+    show_tableau_fitch(root->l, counter);
 }

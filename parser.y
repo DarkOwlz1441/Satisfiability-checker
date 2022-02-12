@@ -116,8 +116,7 @@ int main (int argc, char *argv[])
     yyparse();
     puts("OK, END TEST");
     puts("initial tableau forms test:");
-    show_tableau(init_tableau(formulae));
-    
+    show_tableau(init_tableau(&formulae));
 }
 
 int yyerror(char *s)
