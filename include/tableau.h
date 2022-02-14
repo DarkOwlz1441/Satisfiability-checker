@@ -112,91 +112,138 @@ tab_nd *init_tableau(stk_nd **formulae) // needs debugging
 
 // auxiliary function to add formulae to all the branches, 
 // in a alpha expansion
-void add_forms_alpha(tab_nd *root, tab_nd *add1, tab_nd *add2)
-{
-    if(!root || (!add1 && !add2))
+void add_forms_alpha(tab_nd **root, tab_nd *add1, tab_nd *add2)
+{    
+    if(!root)
+    {
+        fprintf(stderr, "ERROR on alpha expansion: NULL root reference.\n");
         return;
-    
-    if(root->l)
-        add_forms_alpha(root->l, add1, add2);
-    
-    if(root->r)
-        add_forms_alpha(root->r, add1, add2);
-    
-    if(!root->l && !root->r)
+    }
+
+    if(!add1 && !add2) // no formulas to add
+        return;
+
+    if(!*root) // if the tableau is empty, just add
     {
         if(add1)
         {
-            root->l = add1;
+            *root = add1;
             add1->l = add2;
         }
 
         else
-            root->l = add2;
+            *root = add2;
+        
+        return;
     }
+
+    if((*root)->l)
+        add_forms_alpha(&(*root)->l, add1, add2);
+    
+    if((*root)->r)
+        add_forms_alpha(&(*root)->r, add1, add2);
+    
+    if(!(*root)->l && !(*root)->l)
+    {
+        if(add1)
+        {
+            (*root)->l = add1;
+            add1->l = add2;
+        }
+
+        else
+            (*root)->l = add2;
+    }
+
 }
 
-
-void add_forms_beta(tab_nd *root, tab_nd *add1, tab_nd *add2)
+// auxiliary function to add formulae to all the branches, 
+// in a beta expansion
+void add_forms_beta(tab_nd **root, tab_nd *add1, tab_nd *add2)
 {
-    if(!root || !add1 || !add2)
-        return;
-    
-    if(root->l)
-        add_forms_beta(root->l, add1, add2);
-    
-    if(!root->l && !root->r)
+    if(!root)
     {
-        root->l = add1;
-        root->l = add2;
+        fprintf(stderr, "ERROR on function add_forms_beta: NULL ROOT REFERENCE.\n");
         return;
     }
 
-    if(root->r)
-        add_forms_beta(root->r, add1, add2);
+    if(!*root)
+    {
+        fprintf(stderr, "ERROR on function add_forms_beta: cannot do a beta expansion on a empty tableau.\n");
+        return;
+    }
+
+    if(!add1 || !add2)
+    {
+        fprintf(stderr, "ERROR on function add_forms_beta: missing beta formulae.\n");
+        return;
+    }
+
+    if((*root)->l)
+        add_forms_beta(&(*root)->l, add1, add2);
+
+    else
+    {
+        (*root)->l = add1;
+        (*root)->r = add2;
+        return;
+    }
+
+    if((*root)->r)
+        add_forms_beta(&(*root)->r, add1, add2);
 }
 
 // handle cases for an alpha expansion
-void alpha_exp(tab_nd *root, tab_nd *form)
+void alpha_exp(tab_nd **root, tab_nd *form)
 {
-
+    if(!root || !form) 
+        return;
+    
     tree_nd *formula = form->mk_form.form;
     
+    tab_nd *form1 = NULL;
+    tab_nd *form2 = NULL;
+
     // T_¬A   |->  F_A
     if(!strcmp(formula->tok, "-") && form->mk_form.mk == MARK_T)
     {
-        // TODO: rest of code for this expansion
+        form1 = new_tab_node(new_marked_form(MARK_F, form->mk_form.form->l), NULL, NULL);
     }
     // F_¬A   |->  T_A
     else if(!strcmp(formula->tok, "-") && form->mk_form.mk == MARK_F)
     {
-        // TODO: rest of code for this expansion
+        form1 = new_tab_node(new_marked_form(MARK_T, form->mk_form.form->l), NULL, NULL);
     }
     // T_A∧B  |->  T_A   T_B
     if(!strcmp(formula->tok, "&") && form->mk_form.mk == MARK_T)
     {
-        // TODO: rest of code for this expansion
+        form1 = new_tab_node(new_marked_form(MARK_T, form->mk_form.form->l), NULL, NULL);
+        form2 = new_tab_node(new_marked_form(MARK_T, form->mk_form.form->r), NULL, NULL);
     }
     // F_A∨B  |->  F_A   F_B
     else if(!strcmp(formula->tok, "#") && form->mk_form.mk == MARK_F)
     {
-        // TODO: rest of code for this expansion
+        form1 = new_tab_node(new_marked_form(MARK_F, form->mk_form.form->l), NULL, NULL);
+        form2 = new_tab_node(new_marked_form(MARK_F, form->mk_form.form->r), NULL, NULL);
     }
-    // F_A→B | T_A   F_B
+    // F_A→B | T_A   F_B // TODO: Handle case where the formulas are the same, closing the branch
     else
     {
-        // TODO: rest of code for this expansion
+        form1 = new_tab_node(new_marked_form(MARK_F, form->mk_form.form->l), NULL, NULL);
+        form2 = new_tab_node(new_marked_form(MARK_F, form->mk_form.form->r), NULL, NULL);
     }
+
+    add_forms_alpha(root, form1, form2);
 }
 
 // handle cases for a beta expansion
-void beta_exp(tab_nd *root, tab_nd *form)
+void beta_exp(tab_nd **root, tab_nd *form)
 {
     // TODO: beta expansion cases
 }
 
 // expands a formula
-void expand_form(tab_nd *root, tab_nd *form)
+void expand_form(tab_nd **root, tab_nd *form)
 {
     if(!form)
         return;
@@ -216,7 +263,7 @@ void expand_form(tab_nd *root, tab_nd *form)
 
 // this is just printing the formulas of the tableau.
 // not organized.
-void __show_tableau(tab_nd *tableau)
+void show_tableau(tab_nd *tableau)
 {
     if(!tableau)
         return;
@@ -229,16 +276,8 @@ void __show_tableau(tab_nd *tableau)
     show_form(tableau->mk_form.form);
     puts("");
 
-    __show_tableau(tableau->l);
-    __show_tableau(tableau->r);
-}
-
-void show_tableau(tab_nd *tableau)
-{
-    if(!tableau)
-        puts("EMPTY TABLEAU");
-    else
-        __show_tableau(tableau);
+    show_tableau(tableau->l);
+    show_tableau(tableau->r);
 }
 
 /*
@@ -266,11 +305,8 @@ void show_tableau(tab_nd *tableau)
     |                            | x                         |
     |____________________________|___________________________|
 */
-void show_tableau_fitch(tab_nd *root, unsigned counter)
+void __show_tableau_fitch(tab_nd *root, unsigned counter)
 {
-    // TODO: implement code for displaying tableau in a 
-    // fitch way.
-
     if(!root)
         return;
     
@@ -287,6 +323,14 @@ void show_tableau_fitch(tab_nd *root, unsigned counter)
     show_form(root->mk_form.form);
     puts("");
     
-    show_tableau_fitch(root->r, counter + 1);
-    show_tableau_fitch(root->l, counter);
+    __show_tableau_fitch(root->r, counter + 1);
+    __show_tableau_fitch(root->l, counter);
+}
+
+void show_tableau_fitch(tab_nd *root)
+{
+    if(!root)
+        fprintf(stderr, "EMPTY TABLEAU\n");
+    else
+        __show_tableau_fitch(root, 0);
 }
