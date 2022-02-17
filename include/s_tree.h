@@ -17,9 +17,11 @@ typedef struct tree_node
     const char *tok;
     struct tree_node *l;
     struct tree_node *r;
-} tree_nd;
-
-//Function that generates and allocates a new node
+}
+tree_nd;
+/*
+    Function that generates and allocates a new tree node
+*/
 tree_nd *new_tree_node(const char* tok, tree_nd *l, tree_nd *r)
 {   
     tree_nd *new_nd = (tree_nd *) malloc(sizeof(tree_nd));
@@ -87,7 +89,10 @@ void show_form(tree_nd *root)
             putchar(')');
     }
 }
-
+/*
+    function that frees a tree from memory recursively, using the free() function
+    for each node
+*/
 void free_tree(tree_nd **ref_root)
 {
     if(!ref_root || !*ref_root)
@@ -111,8 +116,9 @@ void free_tree(tree_nd **ref_root)
 
     free(root);
 }
-
-//  Function that clones a tree formed by the node structure
+/*
+    Function that clones a tree and returns its copy
+*/
 tree_nd* clone_tree(tree_nd *root)
 {
     if (!root)
@@ -120,7 +126,9 @@ tree_nd* clone_tree(tree_nd *root)
 
     return new_tree_node(root->tok, clone_tree(root->l), clone_tree(root->r));
 }
-
+/*
+    determine if 2 syntax trees are the equal. if yes, returns TRUE. If not, returns FALSE
+*/
 bool equal_forms(tree_nd *form1, tree_nd *form2)
 {
     // returns true if the formulas are the same object in memory,

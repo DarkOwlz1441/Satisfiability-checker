@@ -9,8 +9,11 @@ typedef struct stack_node
 {
     tree_nd *formula;
     struct stack_node *next;
-} stk_nd;
-
+}
+stk_nd;
+/*
+    Function that generates and allocates a new stack node
+*/
 stk_nd *new_stk_nd(tree_nd *formula)
 {
     stk_nd *new_node = (stk_nd *) malloc(sizeof(stk_nd));
@@ -23,7 +26,9 @@ stk_nd *new_stk_nd(tree_nd *formula)
 
     return new_node;
 }
-
+/*
+    pushes a formula to the stack
+*/
 void stk_push(stk_nd **head, tree_nd *formula)
 {
     stk_nd* new_node = new_stk_nd(formula);
@@ -31,8 +36,9 @@ void stk_push(stk_nd **head, tree_nd *formula)
     new_node->next = *head;
     *head = new_node;
 }
-
-// pops from the stack and returns the popped formula
+/*
+    pops from the stack and returns the popped formula
+*/
 tree_nd *stk_pop(stk_nd **head) // TODO: handle deep pop, that is, pop the stack nodes 
 {                               // AND the formulas inside (trees)
     if(!head || !*head)
@@ -45,7 +51,9 @@ tree_nd *stk_pop(stk_nd **head) // TODO: handle deep pop, that is, pop the stack
     
     return popped_val;
 }
-
+/*
+    pops all nodes from stack
+*/
 void stk_pop_all(stk_nd **head)
 {
     if(!head)
@@ -54,7 +62,9 @@ void stk_pop_all(stk_nd **head)
     while(*head)
         stk_pop(head);
 }
-
+/*
+    shows the stack
+*/
 void stk_show(stk_nd *head)
 {
     if(!head)

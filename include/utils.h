@@ -8,13 +8,15 @@
     This is the definition of a boolean type, using enums.
 */
 typedef enum bool{FALSE, TRUE} bool;
-
 /*
-    This function is responsible for duplicating literal strings,
-    in other implementations we use it to obtain the terms of the
-    proposition, which we call token
-*/
+    This function is responsible for duplicating literal strings.
+    it receives a string and returns a copy for it.
 
+    There is the strdup() function that does the exact same thing,
+    but it is rather a GCC function than a C Library one. So it is
+    not so portable. That is why we implemented a custom one, for 
+    using in this project.
+*/
 char *custom_strdup(const char *string)
 {
     size_t string_len = strlen(string);
@@ -22,13 +24,9 @@ char *custom_strdup(const char *string)
     
     // Check if the duplicate pointer has been allocated 
     if(!duplicate)
-    {
         return NULL;
-    }
 
-    /* 
-        Returns the duplicate pointer with the same content/memory
-        as the literary string passed as parameter 
-    */
+    // Returns the duplicate pointer with the same content/memory
+    // as the literary string passed as parameter
     return (char *) memcpy(duplicate, string, (string_len + 1));
 }

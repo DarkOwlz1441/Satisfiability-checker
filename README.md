@@ -1,3 +1,3 @@
 # analytic-tableaux-in-C
 
-An analytic tableaux solver in C.
+A sequent solver using analytic tableaux in C.

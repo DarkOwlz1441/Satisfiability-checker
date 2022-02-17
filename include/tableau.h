@@ -24,22 +24,25 @@
 #include "stack.h"
 #include "utils.h"
 
-typedef enum mark{MARK_T, MARK_F, MARK_ERROR} mark;
-typedef enum type{TYPE_ALPHA, TYPE_BETA, TYPE_ATOM, TYPE_ERROR} type;
+typedef enum mark{MARK_T, MARK_F, MARK_ERROR, NO_MARK} mark;
+typedef enum type{TYPE_ALPHA, TYPE_BETA, TYPE_ATOM, TYPE_ERROR, CLOSE_BRANCH} type;
 
 typedef struct marked_formula
 {
     mark mk;        // "mark" of the formula, a T or a F.
     type tp;        // "type" of the formula, either Alpha (α), Beta (β) or an simple Atom.
     tree_nd *form;  // the formula itself, passed as the root of the syntax tree.
-} marked;
-
+}
+marked;
 /*
-    AUXILIARY that analyses a formula and returns its type
+    auxiliary function that analyses a formula and returns its type
 */
 type which_type(tree_nd *form, mark mk)
 {
-    if(!form || mk == MARK_ERROR)
+    if(!form)                 // a tableau formula without formula will be 
+        return CLOSE_BRANCH;  // that "x" that closes the branch
+
+    if(mk == MARK_ERROR)
         return TYPE_ERROR;
 
     if(!form->l && !form->r)
@@ -51,7 +54,9 @@ type which_type(tree_nd *form, mark mk)
 
     return TYPE_ALPHA;
 }
-
+/*
+    function that creates a new marked formula and returns it
+*/
 marked new_marked_form(mark mk, tree_nd *form)
 {
     marked new_marked;
@@ -67,8 +72,11 @@ typedef struct tableau_node
     marked mk_form;         // the marked formula.
     struct tableau_node *l; // pointer to left.
     struct tableau_node *r; // pointer to right.
-} tab_nd;
-
+}
+tab_nd;
+/*
+    Function that generates and allocates a new tableau node
+*/
 tab_nd *new_tab_node(marked mk_form, tab_nd *left, tab_nd *right)
 {
     tab_nd *new_nd = (tab_nd *) malloc(sizeof(tab_nd));
@@ -82,8 +90,6 @@ tab_nd *new_tab_node(marked mk_form, tab_nd *left, tab_nd *right)
 
     return new_nd;
 }
-
-
 /*
     function that builds the initial tableau, using the entered formulae,
     which were put in a stack.
@@ -112,7 +118,6 @@ tab_nd *init_tableau(stk_nd **formulae) // needs debugging
     
     return new_tab;
 }
-
 /*
     auxiliary function to add formulae to all the branches, 
     in a alpha expansion
@@ -198,7 +203,6 @@ void add_forms_beta(tab_nd **root, tab_nd *add1, tab_nd *add2)
     if((*root)->r)
         add_forms_beta(&(*root)->r, add1, add2);
 }
-
 /*
     handle cases for an alpha expansion
 */
@@ -223,13 +227,13 @@ void alpha_exp(tab_nd **root, tab_nd *form)
         form1 = new_tab_node(new_marked_form(MARK_T, form->mk_form.form->l), NULL, NULL);
     }
     // T_A∧B  |->  T_A   T_B
-    if(!strcmp(formula->tok, "&") && form->mk_form.mk == MARK_T)
+    else if(!strcmp(formula->tok, "&"))
     {
         form1 = new_tab_node(new_marked_form(MARK_T, form->mk_form.form->l), NULL, NULL);
         form2 = new_tab_node(new_marked_form(MARK_T, form->mk_form.form->r), NULL, NULL);
     }
     // F_A∨B  |->  F_A   F_B
-    else if(!strcmp(formula->tok, "#") && form->mk_form.mk == MARK_F)
+    else if(!strcmp(formula->tok, "#"))
     {
         form1 = new_tab_node(new_marked_form(MARK_F, form->mk_form.form->l), NULL, NULL);
         form2 = new_tab_node(new_marked_form(MARK_F, form->mk_form.form->r), NULL, NULL);
@@ -243,15 +247,37 @@ void alpha_exp(tab_nd **root, tab_nd *form)
 
     add_forms_alpha(root, form1, form2);
 }
-
 /*
     handle cases for a beta expansion
 */
 void beta_exp(tab_nd **root, tab_nd *form)
 {
-    // TODO: beta expansion cases
-}
+    tree_nd *formula = form->mk_form.form;
 
+    tab_nd *form1 = NULL;
+    tab_nd *form2 = NULL;
+
+    // F_A∧B  |->  F_A   F_B
+    if(!strcmp(formula->tok, "&"))
+    {
+        form1 = new_tab_node(new_marked_form(MARK_F, formula->l), NULL, NULL);
+        form2 = new_tab_node(new_marked_form(MARK_F, formula->r), NULL, NULL);
+    }
+    // T_A∨B | T_A   T_B
+    else if(!strcmp(formula->tok, "#"))
+    {
+        form1 = new_tab_node(new_marked_form(MARK_T, formula->l), NULL, NULL);
+        form2 = new_tab_node(new_marked_form(MARK_T, formula->r), NULL, NULL);
+    }
+    // T_A→B | F_A   T_B
+    else
+    {
+        form1 = new_tab_node(new_marked_form(MARK_F, formula->l), NULL, NULL);
+        form2 = new_tab_node(new_marked_form(MARK_T, formula->r), NULL, NULL);
+    }
+
+    add_forms_beta(root, form1, form2);
+}
 /*
     expands a formula
 */
@@ -276,21 +302,23 @@ void expand_form(tab_nd **root, tab_nd *form)
     this is just printing the formulas of the tableau.
     not organized.
 */
-void __show_tableau(tab_nd *tableau)
+void __show_tableau(tab_nd *root)
 {
-    if(!tableau)
+    if(!root)
         return;
 
-    if(tableau->mk_form.mk == MARK_T)
+    if(root->mk_form.mk == NO_MARK) // represents a "branch-closing" formula (x)
+        fputs("*", stdout);
+    if(root->mk_form.mk == MARK_T)
         fputs("T", stdout);
     else
         fputs("F", stdout);
 
-    show_form(tableau->mk_form.form);
+    show_form(root->mk_form.form);
     puts("");
 
-    __show_tableau(tableau->l);
-    __show_tableau(tableau->r);
+    __show_tableau(root->l);
+    __show_tableau(root->r);
 }
 
 void show_tableau(tab_nd *root)
@@ -300,9 +328,8 @@ void show_tableau(tab_nd *root)
     else
         __show_tableau(root);
 }
-
 /*
-    show tableau in a "fitch" way, organized in "boxes"
+    show tableau in a "fitch" way, organized in "sections"
     it gives us the possibility of visualizing the branches
     better, in a linear way. It is an easier to display
     alternative to the original tree format.
@@ -336,7 +363,9 @@ void __show_tableau_fitch(tab_nd *root, unsigned counter)
         fputs("| ", stdout);
     }
 
-    if(root->mk_form.mk == MARK_T)
+    if(root->mk_form.mk == NO_MARK) // represents a "branch-closing" formula (x)
+        fputs("*", stdout);
+    else if(root->mk_form.mk == MARK_T)
         fputs("T", stdout);
     else
         fputs("F", stdout);
