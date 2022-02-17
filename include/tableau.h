@@ -34,7 +34,9 @@ typedef struct marked_formula
     tree_nd *form;  // the formula itself, passed as the root of the syntax tree.
 } marked;
 
-// AUXILIARY that analyses a formula and returns its type
+/*
+    AUXILIARY that analyses a formula and returns its type
+*/
 type which_type(tree_nd *form, mark mk)
 {
     if(!form || mk == MARK_ERROR)
@@ -82,9 +84,10 @@ tab_nd *new_tab_node(marked mk_form, tab_nd *left, tab_nd *right)
 }
 
 
-
-// function that builds the initial tableau, using the entered formulae,
-// which were put in a stack.
+/*
+    function that builds the initial tableau, using the entered formulae,
+    which were put in a stack.
+*/
 tab_nd *init_tableau(stk_nd **formulae) // needs debugging
 {
     if(!formulae || !*formulae)
@@ -110,8 +113,10 @@ tab_nd *init_tableau(stk_nd **formulae) // needs debugging
     return new_tab;
 }
 
-// auxiliary function to add formulae to all the branches, 
-// in a alpha expansion
+/*
+    auxiliary function to add formulae to all the branches, 
+    in a alpha expansion
+*/
 void add_forms_alpha(tab_nd **root, tab_nd *add1, tab_nd *add2)
 {    
     if(!root)
@@ -156,9 +161,10 @@ void add_forms_alpha(tab_nd **root, tab_nd *add1, tab_nd *add2)
     }
 
 }
-
-// auxiliary function to add formulae to all the branches, 
-// in a beta expansion
+/*
+    auxiliary function to add formulae to all the branches, 
+    in a beta expansion
+*/
 void add_forms_beta(tab_nd **root, tab_nd *add1, tab_nd *add2)
 {
     if(!root)
@@ -193,7 +199,9 @@ void add_forms_beta(tab_nd **root, tab_nd *add1, tab_nd *add2)
         add_forms_beta(&(*root)->r, add1, add2);
 }
 
-// handle cases for an alpha expansion
+/*
+    handle cases for an alpha expansion
+*/
 void alpha_exp(tab_nd **root, tab_nd *form)
 {
     if(!root || !form) 
@@ -236,13 +244,17 @@ void alpha_exp(tab_nd **root, tab_nd *form)
     add_forms_alpha(root, form1, form2);
 }
 
-// handle cases for a beta expansion
+/*
+    handle cases for a beta expansion
+*/
 void beta_exp(tab_nd **root, tab_nd *form)
 {
     // TODO: beta expansion cases
 }
 
-// expands a formula
+/*
+    expands a formula
+*/
 void expand_form(tab_nd **root, tab_nd *form)
 {
     if(!form)
@@ -260,10 +272,11 @@ void expand_form(tab_nd **root, tab_nd *form)
         beta_exp(root, form);
     }
 }
-
-// this is just printing the formulas of the tableau.
-// not organized.
-void show_tableau(tab_nd *tableau)
+/*
+    this is just printing the formulas of the tableau.
+    not organized.
+*/
+void __show_tableau(tab_nd *tableau)
 {
     if(!tableau)
         return;
@@ -276,8 +289,16 @@ void show_tableau(tab_nd *tableau)
     show_form(tableau->mk_form.form);
     puts("");
 
-    show_tableau(tableau->l);
-    show_tableau(tableau->r);
+    __show_tableau(tableau->l);
+    __show_tableau(tableau->r);
+}
+
+void show_tableau(tab_nd *root)
+{
+    if(!root)
+        fprintf(stderr, "EMPTY TABLEAU\n");
+    else
+        __show_tableau(root);
 }
 
 /*

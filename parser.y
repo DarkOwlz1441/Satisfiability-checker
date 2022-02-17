@@ -96,13 +96,6 @@ term: ATOM {$$ = new_tree_node($1, NULL, NULL);}
 
 %%
 
-void fancy_welcome()
-{
-    puts("=-=-=-=-=-= SEQUENT SOLVER WITH ANALYTIC TABLEAUX =-=-=-=-=-=\n");
-    puts("enter gamma formulae, ! to stop");
-    fputs("> ", stdout);
-}
-
 int main (int argc, char *argv[])
 {
     puts("=-=-=-=-=-= SEQUENT SOLVER WITH ANALYTIC TABLEAUX =-=-=-=-=-=\n");
@@ -117,7 +110,6 @@ int main (int argc, char *argv[])
     puts("OK, END TEST");
     puts("initial tableau forms test:");
     tab_nd *tableau = init_tableau(&formulae));
-    
 }
 
 int yyerror(char *s)
