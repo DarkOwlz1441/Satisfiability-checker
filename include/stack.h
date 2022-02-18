@@ -1,4 +1,6 @@
-/* stack data structure to store multiple formulae */
+/*
+    stack data structure to store multiple formulae
+*/
 
 #pragma once
 

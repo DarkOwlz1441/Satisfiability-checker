@@ -1,5 +1,38 @@
-/* this is the code to a cool syntax tree */
+/*
+    this is the code to a syntax tree, used to represent propositional formulas.
+    the syntax tree is mostly a binary tree that can represent expressions,
+    sometimes with operators and operands, and the hierarchy of the operators as
+    well.
+    for example, a formula like this:
+    | (A ∨ B)
+    would be represented like this on a syntax tree:
+    |
+    |    ∨
+    |   / \
+    |  A   B
+    |
+    more examples:
 
+    | ((A ∨ B) ∧ C) | (A ∨ (B ∧ C)) |
+    |_______________|_______________|
+    |        ∧      |      ∨        |
+    |       / \     |     / \       |
+    |      ∨   C    |    A   ∧      |
+    |     / \       |       / \     |
+    |    A   B      |      B   C    |
+
+    the rules for formulae definition are pretty much the same from
+    classic propositional logic, except we use:
+
+    '-' character instead of '¬' (NOT)
+    '&' character instead of '∧' (AND)
+    '#' character instead of '∨' (OR)
+    '>' character instead of '→' (IMPLIES)
+
+    the atoms entered can be lowercase letters from a to z
+
+    the reason for this is to facilitate the user's job on entering the formulae.
+*/
 #pragma once
 
 #include <stdlib.h>

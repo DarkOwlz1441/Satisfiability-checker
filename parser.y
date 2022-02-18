@@ -109,7 +109,10 @@ int main (int argc, char *argv[])
     yyparse();
     puts("OK, END TEST");
     puts("initial tableau forms test:");
-    tab_nd *tableau = init_tableau(&formulae));
+    tab_nd *tableau = init_tableau(&formulae);
+    add_forms_alpha(&tableau, new_tab_node(new_branch_closer(), NULL, NULL), NULL);
+    show_tableau_fitch(tableau);
+    printf("%d\n", is_tableau_closed(tableau));
 }
 
 int yyerror(char *s)

@@ -1,3 +1,7 @@
+/*
+    some general utilities
+*/
+
 #pragma once
 
 #include <stdlib.h>

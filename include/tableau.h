@@ -39,7 +39,7 @@ marked;
 */
 type which_type(tree_nd *form, mark mk)
 {
-    if(!form)                 // a tableau formula without formula will be 
+    if(!form)       // a tableau formula without formula will be 
         return CLOSE_BRANCH;  // that "x" that closes the branch
 
     if(mk == MARK_ERROR)
@@ -66,7 +66,16 @@ marked new_marked_form(mark mk, tree_nd *form)
 
     return new_marked;
 }
-
+/*
+    function that creates a special formula used to close a tableau branch
+*/
+marked new_branch_closer()
+{
+    return new_marked_form(NO_MARK, NULL);
+}
+/*
+    the tableau node structure
+*/
 typedef struct tableau_node
 {
     marked mk_form;         // the marked formula.
@@ -77,7 +86,7 @@ tab_nd;
 /*
     Function that generates and allocates a new tableau node
 */
-tab_nd *new_tab_node(marked mk_form, tab_nd *left, tab_nd *right)
+tab_nd *new_tab_node(marked mk_form, tab_nd *left, tab_nd *right) // TODO: handle NULL case in other functions
 {
     tab_nd *new_nd = (tab_nd *) malloc(sizeof(tab_nd));
     
@@ -155,6 +164,10 @@ void add_forms_alpha(tab_nd **root, tab_nd *add1, tab_nd *add2)
     
     if(!(*root)->l && !(*root)->l)
     {
+        // branch is closed, does not add.
+        if((*root)->mk_form.tp == CLOSE_BRANCH)
+            return;
+
         if(add1)
         {
             (*root)->l = add1;
@@ -195,8 +208,12 @@ void add_forms_beta(tab_nd **root, tab_nd *add1, tab_nd *add2)
 
     else
     {
-        (*root)->l = add1;
-        (*root)->r = add2;
+        // adds only if the branch is not closed
+        if((*root)->mk_form.tp != CLOSE_BRANCH)
+        {
+            (*root)->l = add1;
+            (*root)->r = add2;
+        }
         return;
     }
 
@@ -281,22 +298,39 @@ void beta_exp(tab_nd **root, tab_nd *form)
 /*
     expands a formula
 */
-void expand_form(tab_nd **root, tab_nd *form)
-{
+void expand_form(tab_nd **root, tab_nd *form) // TODO: handle add_forms changes to add only in
+{                                            // proper subtree
     if(!form)
         return;
 
     // alpha expansions
     if(form->mk_form.tp == TYPE_ALPHA)
     {
-        alpha_exp(root, form);        
+        alpha_exp(&form, form);        
     }
     
     // beta expansions
     else if(form->mk_form.tp == TYPE_BETA)
     {
-        beta_exp(root, form);
+        beta_exp(&form, form);
     }
+}
+/*
+    function for checking either a tableau is closed or not. If yes, returns TRUE.
+    if no, returns FALSE.
+*/
+bool is_tableau_closed(tab_nd *root)
+{
+    if(root->l && root->r)
+        return is_tableau_closed(root->l) && is_tableau_closed(root->r);
+
+    if(root->l)
+        return is_tableau_closed(root->l);
+    
+    if(root->r)
+        return is_tableau_closed(root->r);
+    
+    return root->mk_form.tp == CLOSE_BRANCH ? TRUE : FALSE;
 }
 /*
     this is just printing the formulas of the tableau.
@@ -329,7 +363,7 @@ void show_tableau(tab_nd *root)
         __show_tableau(root);
 }
 /*
-    show tableau in a "fitch" way, organized in "sections"
+    show tableau in a "fitch" stylized way, organized in "sections"
     it gives us the possibility of visualizing the branches
     better, in a linear way. It is an easier to display
     alternative to the original tree format.
