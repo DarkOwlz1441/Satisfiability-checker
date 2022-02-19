@@ -59,7 +59,8 @@ tree_nd *new_tree_node(const char* tok, tree_nd *l, tree_nd *r)
 {   
     tree_nd *new_nd = (tree_nd *) malloc(sizeof(tree_nd));
 
-    if(!new_nd) return NULL;
+    if(!new_nd)
+        return NULL;
 
     new_nd->tok = custom_strdup(tok);
     new_nd->l   = l;

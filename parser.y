@@ -4,6 +4,7 @@
     #include "include/s_tree.h"
     #include "include/stack.h"
     #include "include/tableau.h"
+    #include "include/exp_tab.h"
 
     int yylex();
     int yyerror();
@@ -102,17 +103,17 @@ int main (int argc, char *argv[])
     puts("enter gamma formulae, ! to stop");
     fputs("> ", stdout);
     yyparse();
-    puts("end of parsing, changing scan mode");
     read_style = ONLY_ONE;
-    puts("changed, reading now the subsequent formulae");
+    puts("enter inferred formula");
     fputs("> ", stdout);
     yyparse();
-    puts("OK, END TEST");
     puts("initial tableau forms test:");
     tab_nd *tableau = init_tableau(&formulae);
-    add_forms_alpha(&tableau, new_tab_node(new_branch_closer(), NULL, NULL), NULL);
+    // add_forms_alpha(&tableau, new_tab_node(new_branch_closer(), NULL, NULL), NULL);
     show_tableau_fitch(tableau);
-    printf("%d\n", is_tableau_closed(tableau));
+    expand_tableau(&tableau, tableau);
+    puts("after expanding:");
+    show_tableau_fitch(tableau);
 }
 
 int yyerror(char *s)

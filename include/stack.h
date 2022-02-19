@@ -42,7 +42,7 @@ void stk_push(stk_nd **head, tree_nd *formula)
     pops from the stack and returns the popped formula
 */
 tree_nd *stk_pop(stk_nd **head) // TODO: handle deep pop, that is, pop the stack nodes 
-{                               // AND the formulas inside (trees)
+{                              // AND the formulas inside (trees)
     if(!head || !*head)
         return NULL;
 
